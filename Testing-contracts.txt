@@ -1,0 +1,150 @@
+Transaction.deployed().then(function(instance){
+        transactionGlobal = instance;
+    });
+Transaction.deployed().then(function(instance){
+        bal = instance;
+        //return bal.initializeGov(govAddr);
+        return bal.initializeGov.call(govAddr, {from:governmentAddress, gas: 100000});
+    }).catch(function(e){
+    console.log(e);
+  });
+  
+ Transaction.deployed().then(function(instance){
+        bal = instance;
+        //return bal.initializeGov(govAddr);
+        return bal.getBalance.call(govAddr, {from:governmentAddress, gas: 100000});
+    }).then(function(res){
+      console.log(res.valueOf());
+	  
+supplyToGPC: function() {
+    var self = this;
+
+    var gpc = document.getElementById("gpc-address")
+    
+    var Trans;
+    Transaction.deployed().then(function(instance){
+      Trans = instance;
+      return Trans.supplyToGPC(gpc.value,{from: governmentAddress, gas: 100000});
+    }).then(function(res){
+      console.log(res);
+      //self.setStatus("Food supplied to fps");
+    }).catch(function(e){
+      console.log(e);
+      //self.setStatus("Could not supply food to fps");
+    });
+  },
+  
+getPaymentCardDetails1: function () {
+	var self = this;
+	var user = document.getElementById("user-address");
+	var payment;
+	PaymentCards.deployed().then(function(instance){
+	payment = instance;
+	return payment.getPaymentCardDetails(user.value,{from: governmentAddress, gas: 150000});
+	}).then(function(res1,res2,res3,res4,res5){
+      console.log(res1);
+	  console.log(res2);
+	  console.log(res3);
+	  console.log(res4);
+	  console.log(res5);
+      //self.setStatus("Food supplied to fps");
+    }).catch(function(e){
+      console.log(e);
+      //self.setStatus("Could not supply food to fps");
+    });
+},
+
+payToWager: function() {
+    var self = this;
+
+    var gpc = document.getElementById("gpc-address");
+	var user = document.getElementById("user-address");
+    
+    var Trans;
+    Transaction.deployed().then(function(instance){
+      Trans = instance;
+      return Trans.payToWager(user.value, gpc.value,{from: governmentAddress, gas: 200000});
+    }).then(function(res){
+      console.log(res);
+      //self.setStatus("Food supplied to fps");
+    }).catch(function(e){
+      console.log(e);
+      //self.setStatus("Could not supply food to fps");
+    });
+  },
+-------------------------------------------------------------------------------------------------------------------------
+  var accounts = web3.eth.accounts;
+  var gov = accounts[0];
+  >> Transactions.deployed().then(function(instance){bal = instance; return bal.initializeGov.call(gov,
+{from : gov, gas :100000});}).then(function(res){console.log(res.valueOf());});
+true
+
+>> Transactions.deployed().then(function(instance){bal = instance; return bal.getBalancesLength.call(
+{from : gov, gas :100000});}).then(function(res){console.log(res.valueOf());});
+0
+
+-------------------------------------------------------------------------------------------------------------------------
+####User contract tests
+>> var accounts = web3.eth.accounts;
+>> var u1 =accounts[1];
+undefined
+>> User.deployed().then(function(instance){user =instance; return user.addUser(u1, "Ayu", "abc@gmail.com", 2, "abc", 0,{from: gov, gas:220000});}).then(function(res){console.log(res.valueOf());});
+
+>>User.deployed().then(function(instance){user =instance; return user.checkUserExists(u1,2,{from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+>>User.deployed().then(function(instance){user =instance; return user.authenticateUserWithAddress(u1,"abc",{from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+>>User.deployed().then(function(instance){user =instance; return user.getUserInfo(u1,"abc",{from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+>>User.deployed().then(function(instance){user =instance; return user.authenticateUserWithEmail("abc@gmail.com","abc",{from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+>>User.deployed().then(function(instance){user =instance; return user.getPlaces({from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+-------------------------------------------------------------------------------------------------------------------------
+#### Approval contract Tests
+
+>>Approval.deployed().then(function(instance){user =instance; return user.addToNotApprovedList(u1,2,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());});
+
+>>Approval.deployed().then(function(instance){user =instance; return user.getUnApprovedCustomers({from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+>>Approval.deployed().then(function(instance){user =instance; return user.getUnApprovedFPS({from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+>>Approval.deployed().then(function(instance){user =instance; return user.getUnapprovedUser(0,2,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());});
+
+>>Approval.deployed().then(function(instance){user =instance; return user.approveWager(u1,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());});
+
+>>Approval.deployed().then(function(instance){user =instance; return user.approveGPC(u2,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());});
+
+-------------------------------------------------------------------------------------------------------------------------
+
+>>PaymentCards.deployed().then(function(instance){user =instance; return user.addPaymentCard(u1,"Ayu","abc","Silk Board",u2,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());});
+
+-------------------------------------------------------------------------------------------------------------------------
+
+>>var gov = accounts[0];
+>>Transactions.deployed().then(function(instance){user =instance; return user.initializeGov(gov,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());}); 
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.getNoOfTransactions({from: gov, gas:200000});}).then(function(res){console.log(res);});
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.getRemainingGovBalance({from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());});
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.getRemainingGpcBalance(gpc1,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());});
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.getBalance(gov,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());});
+
+>> var gpc1 = accounts[1];
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.supplyToGPC(gpc1,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());});
+
+>> var user1 = accounts[2];
+>>Transactions.deployed().then(function(instance){user =instance; return user.payToWager(user1,gpc1,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());}); 
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.hoursWorked(user1,{from: gov, gas:200000});}).then(function(res){console.log(res.valueOf());}); 
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.validWager(user1,{from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.getHoursWorked(user1,{from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.getDaysWorked(user1,{from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
+
+>>Transactions.deployed().then(function(instance){user =instance; return user.timeWorked(user1,2,3,{from: gov, gas:100000});}).then(function(res){console.log(res.valueOf());});
