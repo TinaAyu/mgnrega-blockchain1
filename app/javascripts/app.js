@@ -6,24 +6,26 @@ import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract'
 
 // Import our contract artifacts and turn them into usable abstractions.
-import metacoin_artifacts from '../../build/contracts/MetaCoin.json'
+import transaction_artifacts from '../../build/contracts/Transactions.json'
 
 // MetaCoin is our usable abstraction, which we'll use through the code below.
-var MetaCoin = contract(metacoin_artifacts);
+var Transaction = contract(transaction_artifacts);
 
 // The following code is simple to show off interacting with your contracts.
 // As your needs grow you will likely need to change its form and structure.
 // For application bootstrapping, check out window.addEventListener below.
 var accounts;
-var account;
-
+var governmentAddress;
+var transactionGlobal;
 window.App = {
   start: function() {
     var self = this;
 
     // Bootstrap the MetaCoin abstraction for Use.
-    MetaCoin.setProvider(web3.currentProvider);
-
+    Transaction.setProvider(web3.currentProvider);
+    Transaction.deployed().then(function(instance){
+        transactionGlobal = instance;
+    });
     // Get the initial account balance so it can be displayed.
     web3.eth.getAccounts(function(err, accs) {
       if (err != null) {
@@ -37,13 +39,146 @@ window.App = {
       }
 
       accounts = accs;
-      account = accounts[0];
-
-      self.refreshBalance();
+      governmentAddress = accounts[0];
+      //var governmentBalance = self.getGovBalance();
+      var gaddressEle = document.getElementById('government-address');
+      
+      gaddressEle.innerHTML = governmentAddress;
+      //gbalanceEle.innerHTML = governmentBalance;
+      self.initializeGovBal();
+     self.getBalance1();
     });
   },
+  initializeGovBal: function(){
+    var self = this;
+    var govAddr = document.getElementById('government-address').innerHTML;
+    var bal;
 
-  setStatus: function(message) {
+    Transaction.deployed().then(function(instance){
+        bal = instance;
+        //return bal.initializeGov(govAddr);
+        return bal.initializeGov(govAddr, {from:governmentAddress, gas: 100000});
+    }).then(function(res){
+      console.log(res.valueOf());
+      //var gbalanceEle = document.getElementById('government-balance');
+      //gbalanceEle.innerHTML = res.valueOf();
+     /* }).catch(function(e){
+    console.log(e);*/
+     //self.getBalance1();
+  });
+
+  },
+  supplyToGPC: function(){
+    var self = this;
+    var gpc = document.getElementById('gpc_addr').value;
+    
+    var gpcAddr = accounts[gpc];
+    alert(gpcAddr);
+    //console.log(gpcAddr);
+    var bal;
+
+    Transaction.deployed().then(function(instance){
+        bal = instance;
+        //return bal.initializeGov(govAddr);
+        return bal.supplyToGPC(gpcAddr, {from:governmentAddress, gas: 200000});
+    }).then(function(res){
+      console.log(res.valueOf());
+      //var gbalanceEle = document.getElementById('government-balance');
+      //gbalanceEle.innerHTML = res.valueOf();
+      }).catch(function(e){
+    console.log(e);
+  });
+      self.getBalance1();
+     
+     /* var user;
+   Transaction.deployed().then(function(instance){
+   user =instance; 
+   return user.getRemainingGpcBalance(gpcAddr,{from: governmentAddress, gas:200000});
+ }).then(function(res){
+  console.log(res.valueOf());
+});  */ 
+  },
+  getBal: function(){
+      var self=this;
+      var addr = prompt("Please enter address of account");
+      if(addr!=null){
+        var addr =accounts[addr];
+        var user;
+        Transaction.deployed().then(function(instance){
+        user = instance;
+        //return bal.initializeGov(govAddr);
+        return user.getBalance.call(addr, {from:governmentAddress, gas: 200000});
+    }).then(function(res){
+      console.log(res.valueOf());
+      alert(res.valueOf());
+      }).catch(function(e){
+    console.log(e);
+  });
+      }
+  },
+  setTimeworked: function(){
+    var self=this;
+    var user;
+    var addr_no =prompt("Please enter wager account to set time");
+    var days1 = prompt("Enter number of days:");
+    var hours1 = prompt("Enter number of hours:");
+    if(addr_no!=null && days1!=null && hours1!=null){
+      var addr =accounts[addr_no];
+      Transaction.deployed().then(function(instance){
+        user =instance; 
+        return user.timeWorked(addr,days1,hours1,{from: governmentAddress, gas:100000});
+      }).then(function(res){
+        alert("Success!!");
+        console.log(res.valueOf());
+     }).catch(function(e){
+    console.log(e);
+  });
+
+    }
+  },
+  supplyToWager: function(){
+    var self = this;
+    var user;
+    var gpc = document.getElementById('gpc_addr').value;
+    var wager = document.getElementById('wager_addr').value;
+    var gpc_addr1 = accounts[gpc];
+    var wager_addr1 = accounts[wager];
+    alert(gpc_addr1)
+    alert(wager_addr1);
+    Transaction.deployed().then(function(instance){
+        user =instance; 
+        return user.payToWager(wager_addr1,gpc_addr1,{from: governmentAddress, gas:200000});
+      }).then(function(res){
+        alert("Success!!");
+        console.log(res.valueOf());
+     }).catch(function(e){
+    console.log(e);
+  });
+
+  },
+  getBalance1: function(){
+
+    var self=this;
+    var govAddr = document.getElementById('government-address').innerHTML;
+    var user;
+
+    Transaction.deployed().then(function(instance){
+        user = instance;
+        //return bal.initializeGov(govAddr);
+        return user.getBalance.call(governmentAddress, {from:governmentAddress, gas: 200000});
+    }).then(function(res){
+      console.log(res.valueOf());
+      var gbalanceEle = document.getElementById('government-balance');
+      gbalanceEle.innerHTML = res.valueOf();
+      //console.log(res1);
+    //var gbalanceEle = document.getElementById('government-balance');
+    //gbalanceEle.innerHTML = res.valueOf();
+  /*}).catch(function(e){
+    console.log(e);*/
+  });
+  },
+
+  /*setStatus: function(message) {
     var status = document.getElementById("status");
     status.innerHTML = message;
   },
@@ -62,6 +197,7 @@ window.App = {
       console.log(e);
       self.setStatus("Error getting balance; see log.");
     });
+    self.sendCoin();
   },
 
   sendCoin: function() {
@@ -84,6 +220,7 @@ window.App = {
       self.setStatus("Error sending coin; see log.");
     });
   }
+*/
 };
 
 window.addEventListener('load', function() {
